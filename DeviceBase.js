@@ -1,5 +1,6 @@
-const EventEmitter = require('events').EventEmitter;
+'use strict';
 
+const EventEmitter = require('events').EventEmitter;
 const os = require('os');
 const http = require('http');
 
@@ -32,12 +33,12 @@ class DeviceBase extends EventEmitter{
 		this.socket.listen(this.port);
 	}
 
-	_handleRequest(request, response){
-		response.end();
+	get location(){
+		return `http://${this.address}:${this.port}/setup.xml`;
 	}
 
-	discover(){
-		return '';
+	_handleRequest(request, response){
+		response.end();
 	}
 }
 

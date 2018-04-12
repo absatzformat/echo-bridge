@@ -1,7 +1,10 @@
+'use strict';
+
 const DeviceBase = require('./DeviceBase.js');
 const fs = require('fs');
 const util = require('util');
 const crypto = require('crypto');
+const os = require('os');
 
 const XML_SETUP = fs.readFileSync('devices/wemo/setup.xml', 'utf8');
 const XML_EVENTSERVICE = fs.readFileSync('devices/wemo/eventservice.xml', 'utf8');
@@ -12,28 +15,28 @@ const XML_SETSTATE = fs.readFileSync('devices/wemo/setstate.xml', 'utf8');
 
 class WemoDevice extends DeviceBase{
 
-	constructor(name, port, state = false){
+	constructor(name, port, state = 0){
+		
 		super(port, 'urn:Belkin:device:**');
 
 		this.name = name;
-		this.serial = crypto.createHash('md5').update(this.name).digest('hex');
+		this.serial = crypto.createHash('md5').update('wemo' + this.name).digest('hex');
 
-		this.state = state; // switch state
+		this.state = state; // switch state (0, 1)
 	}
 
 	_handleRequest(request, response){
 
-		response.setHeader('Content-Type', 'text/xml; charset=utf-8');
 		response.setHeader('Date', new Date().toGMTString());
-		response.setHeader('Server', 'Unspecified, UPnP/1.0, Unspecified');  
-		response.setHeader('X-User-Agent', 'redsonic');
+		response.setHeader('Server', `${os.type()}/${os.release()} UPnP/1.0 Node/1.0`);
+		response.setHeader('Content-Type', 'text/xml; charset=utf-8');
 		response.setHeader('Connection', 'close');
 
 		switch(request.url){
 			
 			// service endpoints
 			case '/setup.xml':
-				const payload = util.format(XML_SETUP, this.name, this.uuid, this.serial, this.state);
+				const payload = util.format(XML_SETUP, this.name, this.uuid, this.serial);
 				response.write(payload, response.end.bind(response));
 			break;
 			case '/eventservice.xml':
@@ -55,49 +58,36 @@ class WemoDevice extends DeviceBase{
 						request.on('data', (data) => body += data.toString());
 						request.on('end', () => {
 
+							const lastState = this.state;
+
 							if(body.indexOf('<BinaryState>1</BinaryState>') >= 0){
-								this.state = true;
-								this.emit('change', this.state);
+								this.state = 1;
+								this.emit('on');
 							}
 							else if(body.indexOf('<BinaryState>0</BinaryState>') >= 0){
-								this.state = false;
+								this.state = 0;
+								this.emit('off');
+							}
+
+							if(this.state !== lastState){
 								this.emit('change', this.state);
 							}
 
 							response.write(util.format(XML_SETSTATE, this.state), response.end.bind(response));
 						});
-
-						return;
 					}
-
-					response.write(util.format(XML_GETSTATE, this.state), response.end.bind(response));
+					else{
+						response.write(util.format(XML_GETSTATE, this.state), response.end.bind(response));
+					}
 				}
-				response.statusCode = 400;
-				response.end();
+				else{
+					response.write(util.format('<serialNumber>%s</serialNumber>', this.serial), response.end.bind(response));
+				}
 			break;
 
 			default:
-				response.statusCode = 400;
-				response.end();
+				response.write(util.format('<serialNumber>%s</serialNumber>', this.serial), response.end.bind(response));
 		}
-	}
-
-	discover(){
-		return [
-			'HTTP/1.1 200 OK',
-			'CACHE-CONTROL: max-age=86400',
-			`DATE: ${new Date().toGMTString()}`,
-			'EXT:',
-			`LOCATION: http://${this.address}:${this.port}/setup.xml`,
-			'OPT: "http://schemas.upnp.org/upnp/1/0/"; ns=01',
-			`01-NLS: ${this.uuid}`,
-			'SERVER: Unspecified, UPnP/1.0, Unspecified',
-			`ST: ${this.target}`,
-			`USN: uuid:${this.serial}::${this.target}`,
-			'X-User-Agent: redsonic',
-			'',
-			''
-		].join('\r\n');
 	}
 }
 

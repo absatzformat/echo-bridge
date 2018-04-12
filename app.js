@@ -5,7 +5,15 @@ const HueDevice = require('./HueDevice.js');
 const wemo = new WemoDevice('Wohnzimmer', 60015);
 
 wemo.on('change', (state) => {
-	console.log(`Device ${wemo.name}: ${state}`);
+	console.log(`Device ${wemo.name} state: ${state}`);
+});
+
+wemo.on('on', () => {
+	console.log(`Device ${wemo.name}: ON`);
+});
+
+wemo.on('off', () => {
+	console.log(`Device ${wemo.name}: OFF`);
 });
 
 const devices = [

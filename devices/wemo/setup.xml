@@ -8,7 +8,7 @@
         <modelNumber>1.0</modelNumber>
         <UDN>uuid:%s</UDN>
         <serialNumber>%s</serialNumber>
-        <binaryState>%d</binaryState>
+        <binaryState>0</binaryState>
         <serviceList>
             <service>
                 <serviceType>urn:Belkin:service:basicevent:1</serviceType>
