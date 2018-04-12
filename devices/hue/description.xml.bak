@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+	<specVersion>
+		<major>1</major>
+		<minor>0</minor>
+	</specVersion>
+	<URLBase>http://%s:%s/</URLBase>
+	<device>
+		<deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>
+		<friendlyName>%s</friendlyName>
+		<manufacturer>Absatzformat</manufacturer>
+		<manufacturerURL>https://github.com/absatzformat</manufacturerURL>
+		<modelDescription>Custom Hue Bridge</modelDescription>
+		<modelName>Hue Bridge</modelName>
+		<modelNumber>929000226503</modelNumber>
+		<modelURL>http://www.meethue.com</modelURL>
+		<serialNumber>%s</serialNumber>
+		<UDN>uuid:%s</UDN>
+		<presentationURL>index.html</presentationURL>
+		<iconList>
+			<icon>
+				<mimetype>image/png</mimetype>
+				<height>48</height>
+				<width>48</width>
+				<depth>24</depth>
+				<url>hue_logo_0.png</url>
+			</icon>
+			<icon>
+				<mimetype>image/png</mimetype>
+				<height>120</height>
+				<width>120</width>
+				<depth>24</depth>
+				<url>hue_logo_3.png</url>
+			</icon>
+		</iconList>
+	</device>
+</root>
